@@ -5,6 +5,9 @@ colourTools module for SHED
 module containing functions for colour manipulation and generation
 """
 
+#-----Imports-----
+import random
+
 #===================HEX Functions=================
 
 def generateHexColour():
