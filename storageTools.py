@@ -119,7 +119,7 @@ class smartDir:
         #Create location if it doesnt exist already
         createFolder(self.fullPath)
 
-    def pickleData(self,fileName,content):
+    def privatePickleData(self,fileName,content):
         """
         Will pickle the data to this
         smart directory
@@ -130,7 +130,7 @@ class smartDir:
         #Return path
         return newPath
 
-    def unPickleData(self,baseName):
+    def privateUnPickleData(self,baseName):
         """
         Will return the contents
         of the pickled file
@@ -145,12 +145,23 @@ class smartDir:
         """
         return getAllFilesFromDir(self.fullPath,extension)
 
-    def writeFile(self,fileName,extension):
+    def privateWriteFile(self,fileName,extension,content):
         """
         Will write file into the directory
         in plain text
         """
-        
+        #Create path
+        fullPath = createFileFolderPath(self.fullPath,
+            addExtensionToFile(fileName,extension))
+        #Save the content
+        writeFile(fullPath,content)
+
+    def privateOpenFile(self,fileName):
+        """
+        Will open a plain txt file and
+        return the contents
+        """
+        return openFile(createFileFolderPath(self.fullPath,fileName))
 
 class dataManager(smartDir):
     """
@@ -160,10 +171,12 @@ class dataManager(smartDir):
     and save to folders and search
     for data.
     """
-    def __init__(self,rootDir,name):
-        smartDir.__init__(self,rootDir,name)
-        self.name=name
-        self.rootDir=rootDir
+    def __init__(self,projectManager):
+        smartDir.__init__(self,projectManager.rootDir,
+            projectManager.dataFolderName)
+        self.name=projectManager.projectName
+        self.rootDir=projectManager.rootDir
+        self.projectManager=projectManager
         self.subFolderDict={}
 
         #Find current folders
@@ -190,6 +203,29 @@ class dataManager(smartDir):
         #Store smart directory
         self.subFolderDict[folderName]=newSmartDir
 
+    def pickleData(self,folder,fileName,content):
+        """
+        Will pickle data to a specified 
+        folder, if the folder does not exist
+        create one
+        """
+        #If the smart directory exists
+        if folder in self.subFolderDict:
+            self.subFolderDict[folder].privatePickleData(fileName,
+                content)
+        else:
+            #Create one and call the function again
+            self.addSubFolder(folder)
+            self.pickleData(folder,fileName,content)
+
+    def openPickle(self,folder,fileName):
+        """
+        Will open a pickle file
+        in the specified directory
+        """
+        #Check folder exists
+        if folder in self.subFolderDict:
+            return self.subFolderDict[folder].privateUnPickleData(fileName)
 
 class projectManager:
     """
@@ -200,11 +236,56 @@ class projectManager:
     def __init__(self,rootDir,projectName):
         self.projectName=projectName
         self.rootDir=rootDir
+        self.dataFolderName=projectName+" data"
+        self.dataManager=dataManager(self)
+        #Store Template names
+        self.userDataFolderName="UserData"
         self.fileExtension=".txt"
 
-        self.dataFolderName=projectName+" data"
-        self.dataManager=dataManager(self.rootDir,
-            self.dataFolderName)
+
+    def addFolder(self,folderName):
+        """
+        Will create a new smart folder in
+        the data manager
+        """
+        self.dataManager.addSubFolder(folderName)
+
+    def getFolder(self,folderName):
+        """
+        Will find the smart directory
+        object and return in
+        """
+        if folderName in self.dataManager.subFolderDict:
+            return self.dataManager.subFolderDict[folderName]
+        else:
+            print("Could not find core folder")
+            return False
+
+    def saveUserData(self,fileName,content):
+        """
+        Will take base file, add extension and
+        then save it in the userDataFolderName folder,
+        if this does not exist create it
+        """
+        #Create Filename with extension
+        fullFileName=addExtensionToFile(fileName,self.fileExtension)
+        #Save to this file
+        self.dataManager.pickleData(self.userDataFolderName,content)
+
+    def findAllFiles(self,extension):
+        """
+        Will locate all files
+        in directory with extension
+        """
+        return getAllFilesFromDir(self.rootDir,extension)
+
+    def findAllUserFiles(self):
+        """
+        Will locate all files with
+        file extension
+        """
+        return self.findAllFiles(self.fileExtension)
 
 
 
+        
