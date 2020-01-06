@@ -79,8 +79,31 @@ def createFolder(folderPath):
     if not os.path.exists(folderPath):
         os.mkdir(folderPath)
 
+def getAllFilesFromDir(directory,extension):
+    """
+    Will return the files with
+    the extension from the given
+    directory
+    """
+    results=[]
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            #Add to list
+            wholeFile=os.path.join(root,file)
+            if file.endswith(extension):
+                results.append(file)
 
+    return results
 
+def addExtensionToFile(fileName,extension):
+    """
+    Will add an extension to filename
+    if there is not already one there.
+    """
+    if fileName.endswith(extension):
+        return fileName
+    else:
+        return (fileName+extension)
 #--------------Classes-----------
 
 class smartDir:
@@ -115,6 +138,19 @@ class smartDir:
         newPath=createFileFolderPath(self.fullPath,baseName)
         return openPickle(newPath)
 
+    def findFiles(self,extension):
+        """
+        Will search recursivley 
+        for files inside the directory
+        """
+        return getAllFilesFromDir(self.fullPath,extension)
+
+    def writeFile(self,fileName,extension):
+        """
+        Will write file into the directory
+        in plain text
+        """
+        
 
 class dataManager(smartDir):
     """
@@ -153,6 +189,7 @@ class dataManager(smartDir):
         newSmartDir=smartDir(self.rootDir,folderName)
         #Store smart directory
         self.subFolderDict[folderName]=newSmartDir
+
 
 class projectManager:
     """
