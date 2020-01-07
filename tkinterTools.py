@@ -17,7 +17,7 @@ class mainFrame(Frame):
     functionality and flexibility
     """
     def __init__(self,parent):
-        mainFrame.__init__(self,parent)
+        Frame.__init__(self,parent)
 
 
 
@@ -53,7 +53,7 @@ class screenController(mainFrame):
             #Display
             self.allScreens[screenName].tkraise()
             #Update variable
-            self.currentScreen=screenNam
+            self.currentScreen=screenName
 
 class screen(mainFrame):
     """
