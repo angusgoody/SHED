@@ -242,7 +242,6 @@ class projectManager:
         self.userDataFolderName="UserData"
         self.fileExtension=".txt"
 
-
     def addFolder(self,folderName):
         """
         Will create a new smart folder in
