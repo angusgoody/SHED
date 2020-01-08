@@ -11,7 +11,12 @@ from tkinter import *
 globalButtonWidth=15
 globalFont="system 13"
 globalFontBig="system 16"
+globalFontTiny="system 9"
+globalColours={
+    "red":"#E58A8F",
 
+
+}
 #--------Main Core Classes----------
 
 class mainFrame(Frame):
@@ -163,6 +168,44 @@ class advancedEntry(Entry):
         Entry.__init__(self,parent)
         self.config(font=globalFont,width=15)
 
+        #Store banned words
+        self.bannedWords=["Bob","Angus"]
+        self.contentValid=True
+        self.defaultColour=self.cget("bg")
+        #Add the binding
+        self.bind("<KeyRelease>",lambda event: self.checkContent())
+        
+    def checkContent(self):
+        """
+        Will check content of entry
+        and change colour depending
+        on if content is valid or not
+        """
+        entryContent=self.getContent().upper()
+        #Check
+        for item in self.bannedWords:
+            if item.upper() == entryContent:
+                self.contentValid=False
+                self.configure(bg=globalColours["red"])
+                return False
+        self.resetSettings()
+
+    def resetSettings(self):
+        """
+        Used to reset colour
+        and variables, NOT content
+        """
+        self.configure(bg=self.defaultColour)
+        self.contentValid=True
+
+    def getContent(self):
+        """
+        Will return the contents
+        of the entry in plain 
+        text
+        """
+        return self.get()
+
 #--------Child Classes----------
 
 class dataSection(mainFrame):
@@ -173,11 +216,51 @@ class dataSection(mainFrame):
     """
     def __init__(self,parent,labelData):
         mainFrame.__init__(self,parent)
+        #Config
         self.labelText=StringVar()
         self.labelText.set(labelData)
+
         #Add Entry
         self.entry=advancedEntry(self)
         self.entry.grid(row=0,column=1,padx=5)
         #Add Label
         self.label=advancedLabel(self,textvariable=self.labelText)
         self.label.grid(row=0,column=0)
+
+class buttonSection(mainFrame):
+    """
+    The ButtonSection is a frame
+    that contains a row of buttons
+    """
+    def __init__(self,parent):
+        mainFrame.__init__(self,parent)
+        #Config
+        self.gridConfig(0)
+        #Store data
+        self.buttonOrder=[]
+        self.buttonDict={}
+        #Add Center
+        self.centerFrame=mainFrame(self)
+        self.centerFrame.grid(row=0,column=0,pady=20)
+
+    def addButton(self,name):
+        """
+        Add a button 
+        to the frame
+        """
+        #Create the button
+        newButton=Button(self.centerFrame,text=name,width=globalButtonWidth)
+        #Display it
+        newButton.grid(row=0,column=len(self.buttonOrder),padx=10)
+        #Store it
+        self.buttonOrder.append(name)
+        self.buttonDict[name]=newButton
+
+    def getButton(self,name):
+        """
+        Will return the button
+        object given the name
+        """
+        if name in self.buttonDict:
+            return self.buttonDict[name]
+        
