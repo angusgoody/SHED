@@ -92,7 +92,7 @@ def getAllFilesFromDir(directory,extension):
             #Add to list
             wholeFile=os.path.join(root,file)
             if file.endswith(extension):
-                results.append(file)
+                results.append(wholeFile)
 
     return results
 
@@ -105,6 +105,9 @@ def addExtensionToFile(fileName,extension):
         return fileName
     else:
         return (fileName+extension)
+
+def getFileWithoutExtension(fileName):
+    return os.path.splitext(fileName)[0]
 #--------------Classes-----------
 
 class smartDir:
@@ -285,6 +288,18 @@ class projectManager:
         """
         return self.findAllFiles(self.fileExtension)
 
+    def loadAllUserFiles(self):
+        """
+        Will unpickle all the userdata
+        and return it
+        """
+        allUserFiles=self.findAllUserFiles()
+        contentArray=[]
+        for path in allUserFiles:
+            path=os.path.basename(path)
+            content=self.dataManager.openPickle(self.userDataFolderName,path)
+            contentArray.append(content)
+        return contentArray
 
 
         
