@@ -6,6 +6,7 @@ module containing functions and classes for UI
 
 #--------Imports----------
 from tkinter import *
+from tkinter import messagebox
 
 #--------Global Constants----------
 globalButtonWidth=15
@@ -17,6 +18,18 @@ globalColours={
 
 
 }
+
+#--------Functions----------
+
+def showMessage(pre,message):
+    """
+    Function to show a tkinter
+    message using messagebox
+    """
+    try:
+        messagebox.showinfo(pre,message)
+    except:
+        print(message)
 #--------Main Core Classes----------
 
 class mainFrame(Frame):
@@ -94,14 +107,50 @@ class screen(mainFrame):
                
 class advancedListbox(Listbox):
     """
-    The advancedListbox is built on
-    the tkinter listbox but offers
-    built in methods to store objects
-    etc
+    An advanced listbox
+    can store objects
+    and has more functionality
+    compared to a standard listbox
     """
     def __init__(self,parent):
         Listbox.__init__(self,parent)
-        self.config(font="Avenir 15")
+        self.config(font=globalFontBig)
+        self.objectDict={}
+    def addObject(self,display,objectInstance):
+        """
+        Display data
+        and have it reference an object
+        """
+        #Display
+        self.insert(END,display)
+        #Store
+        self.objectDict[display]=objectInstance
+
+    def getObject(self,name):
+        """
+        Will return the object
+        given the name
+        """
+        if name in self.objectDict:
+            return self.objectDict[name]
+
+    def getCurrentItem(self):
+        """
+        Get the name of the item
+        currently being selected
+        """
+        currentSelectionIndex=self.curselection()
+        if len(currentSelectionIndex) > 0:
+            return self.get(currentSelectionIndex[0])
+
+    def getCurrentObject(self):
+        """
+        Return the object currently in
+        selection
+        """
+        currentItem = self.getCurrentItem()
+        if currentItem in self.objectDict:
+            return self.objectDict[currentItem]
 
 class mainTopLevel(Toplevel):
     """
@@ -139,10 +188,6 @@ class mainTopLevel(Toplevel):
         """
         self.destroy()
         
-    
-        
-        
-        
 
 
 #--------Secondary Core Classes----------
@@ -170,10 +215,14 @@ class advancedEntry(Entry):
 
         #Store banned words
         self.bannedWords=["Bob","Angus"]
+        self.blankAllowed=False
         self.contentValid=True
+        self.reasonInvalid=""
         self.defaultColour=self.cget("bg")
         #Add the binding
         self.bind("<KeyRelease>",lambda event: self.checkContent())
+        #Check content once to update
+        self.checkContent()
         
     def checkContent(self):
         """
@@ -182,10 +231,17 @@ class advancedEntry(Entry):
         on if content is valid or not
         """
         entryContent=self.getContent().upper()
+        #Check that there is content
+        if len(entryContent.split()) < 1 and self.blankAllowed == False:
+            self.contentValid=False
+            self.reasonInvalid="Please enter something"
+            self.configure(bg=self.defaultColour)
+            return False
         #Check
         for item in self.bannedWords:
             if item.upper() == entryContent:
                 self.contentValid=False
+                self.reasonInvalid="This word is banned"
                 self.configure(bg=globalColours["red"])
                 return False
         self.resetSettings()
@@ -197,6 +253,7 @@ class advancedEntry(Entry):
         """
         self.configure(bg=self.defaultColour)
         self.contentValid=True
+        self.reasonInvalid=""
 
     def getContent(self):
         """
