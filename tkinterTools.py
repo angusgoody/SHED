@@ -12,6 +12,7 @@ from tkinter import messagebox
 globalButtonWidth=15
 globalFont="system 13"
 globalFontBig="system 16"
+globalFontMega="syetem 24"
 globalFontTiny="system 9"
 globalColours={
     "red":"#E58A8F",
@@ -114,15 +115,22 @@ class advancedListbox(Listbox):
     """
     def __init__(self,parent):
         Listbox.__init__(self,parent)
-        self.config(font=globalFontBig)
+        self.config(font=globalFontMega)
+        self.rowColour="#E1E0E2"
+        self.rowCount=0
         self.objectDict={}
+    
     def addObject(self,display,objectInstance):
         """
         Display data
         and have it reference an object
         """
         #Display
-        self.insert(END,display)
+        paddedData=(" "*2)+str(display)
+        self.insert(END,paddedData)
+        self.rowCount+=1
+        if self.rowCount % 2 == 0:
+            self.itemconfig(END,bg=self.rowColour)
         #Store
         self.objectDict[display]=objectInstance
 
@@ -141,7 +149,7 @@ class advancedListbox(Listbox):
         """
         currentSelectionIndex=self.curselection()
         if len(currentSelectionIndex) > 0:
-            return self.get(currentSelectionIndex[0])
+            return self.get(currentSelectionIndex[0]).lstrip()
 
     def getCurrentObject(self):
         """
@@ -151,6 +159,22 @@ class advancedListbox(Listbox):
         currentItem = self.getCurrentItem()
         if currentItem in self.objectDict:
             return self.objectDict[currentItem]
+
+    def clear(self,**kwargs):
+        """
+        Will delete everything from
+        the listbox and delete
+        all objects stored
+
+        retain = True: will keep objects
+        """
+        retain = kwargs.get("retain")
+        #Delete everything
+        self.delete(0,"end")
+        if not(retain):
+            #Clear all objects
+            self.objectDict.clear()
+
 
 class mainTopLevel(Toplevel):
     """
@@ -214,7 +238,7 @@ class advancedEntry(Entry):
         self.config(font=globalFont,width=15)
 
         #Store banned words
-        self.bannedWords=["Bob","Angus"]
+        self.bannedWords=[]
         self.blankAllowed=False
         self.contentValid=True
         self.reasonInvalid=""
@@ -262,6 +286,15 @@ class advancedEntry(Entry):
         text
         """
         return self.get()
+
+class advancedOptionMenu(OptionMenu):
+    """
+    Option Menu which allows
+    the variable to accessed at any time
+    """
+    def __init__(self,parent,variable,*values,**kwargs):
+        OptionMenu.__init__(self,parent,variable,*values,**kwargs)
+        self.var=variable
 
 #--------Child Classes----------
 
@@ -321,3 +354,22 @@ class buttonSection(mainFrame):
         if name in self.buttonDict:
             return self.buttonDict[name]
         
+class optionMenuSection(mainFrame):
+    """
+    Similar to dataSection but
+    optionMenu instead of entry
+    """
+    def __init__(self,parent,labelData):
+        mainFrame.__init__(self,parent)
+        #Config
+        self.labelText=StringVar()
+        self.labelText.set(labelData)
+        #Add Label
+        self.label=advancedLabel(self,textvariable=self.labelText)
+        self.label.grid(row=0,column=0)
+        #Add OptionMenu
+        self.optionVar=StringVar()
+        self.optionVar.set("None")
+        self.optionMenu=advancedOptionMenu(self,self.optionVar,["None"])
+        self.optionMenu.config(width=12)
+        self.optionMenu.grid(row=0,column=1,padx=5)

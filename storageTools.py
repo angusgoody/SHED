@@ -108,6 +108,9 @@ def addExtensionToFile(fileName,extension):
 
 def getFileWithoutExtension(fileName):
     return os.path.splitext(fileName)[0]
+
+def getBasename(filePath):
+    return os.path.basename(filePath)
 #--------------Classes-----------
 
 class smartDir:
