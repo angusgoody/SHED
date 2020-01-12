@@ -7,7 +7,7 @@ module containing functions and classes for UI
 #--------Imports----------
 from tkinter import *
 from tkinter import messagebox
-
+from shed.colourTools import getColourForBackground
 #--------Global Constants----------
 globalButtonWidth=15
 globalFont="system 13"
@@ -31,6 +31,53 @@ def showMessage(pre,message):
         messagebox.showinfo(pre,message)
     except:
         print(message)
+
+def getAllChildren(widget):
+    """
+    Will recursivley get all the children
+    of a widget
+    """
+    children=[]
+    if "winfo_children" in dir(widget):
+        for child in widget.winfo_children():
+            children.append(child)
+            results=getAllChildren(child)
+            if results:
+                children.extend(results)
+    return children
+
+def checkListInstanceOf(item,classList):
+    """
+    Will check if item belongs
+    to any of the classes given
+    in classlist
+    """
+    for i in classList:
+        if isinstance(item,i):
+            return True
+    return False
+
+def completeColour(widget,colour):
+    """
+    Will recursivley colour 
+    a widget
+    """
+    allChildren=getAllChildren(widget)
+    allChildren.append(widget)
+    for child in allChildren:
+        if "config" in dir(child):
+            if "highlightbackground" in child.config() and checkListInstanceOf(child,[Frame,Label]) is False:
+                print(type(child),"is background colour")
+                child.config(highlightbackground=colour)
+            else:
+                try:
+                    child.config(bg=colour)
+                except Exception as e:
+                    print("Error changing colour: ",e)
+        if type(child) in [advancedLabel,Label]:
+            newFg=getColourForBackground(colour)
+            child.config(fg=newFg)
+
 #--------Main Core Classes----------
 
 class mainFrame(Frame):
@@ -53,6 +100,13 @@ class mainFrame(Frame):
             self.grid_columnconfigure(x,weight=1)
             self.grid_rowconfigure(x,weight=1)
 
+    def colour(self,colour):
+        """
+        Will recursivley change the
+        colour of all the child
+        widgets
+        """
+        completeColour(self,colour)
 class screenController(mainFrame):
     """
     Screen Controller

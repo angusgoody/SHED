@@ -294,15 +294,17 @@ class projectManager:
     def loadAllUserFiles(self):
         """
         Will unpickle all the userdata
-        and return it
+        and return it in a dictionary
+        key = filename in dir
+        value = object
         """
         allUserFiles=self.findAllUserFiles()
-        contentArray=[]
+        contentDict={}
         for path in allUserFiles:
-            path=os.path.basename(path)
+            path=getBasename(path)
             content=self.dataManager.openPickle(self.userDataFolderName,path)
-            contentArray.append(content)
-        return contentArray
+            contentDict[getFileWithoutExtension(path)]=content
+        return contentDict
 
 
         
