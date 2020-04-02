@@ -308,6 +308,13 @@ class advancedEntry(Entry):
         #Check content once to update
         self.checkContent()
         
+    def markInvalid(self):
+        """
+        Will change the colour to
+        red to indicate a problem
+        """
+        self.configure(bg=globalColours["red"])
+
     def checkContent(self):
         """
         Will check content of entry
@@ -326,7 +333,7 @@ class advancedEntry(Entry):
             if item.upper() == entryContent:
                 self.contentValid=False
                 self.reasonInvalid="This word is banned"
-                self.configure(bg=globalColours["red"])
+                self.markInvalid()
                 return False
         self.resetSettings()
 
