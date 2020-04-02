@@ -354,7 +354,6 @@ class advancedOptionMenu(OptionMenu):
         OptionMenu.__init__(self,parent,variable,*values,**kwargs)
         self.var=variable
 
->>>>>>> origin/master
 #--------Child Classes----------
 
 class dataSection(mainFrame):
