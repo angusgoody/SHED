@@ -60,7 +60,7 @@ def getWorkingDirectory():
     """
     Will return the current working directory the program is in
     """
-    return (os.path.dirname(os.getcwd()))
+    return os.getcwd()
 
 def createFileFolderPath(parentDir,folderOrFile):
     """
@@ -76,6 +76,7 @@ def createFolder(folderPath):
     in memory, if the folder already
     exists it will not create one
     """
+    print("Asked to create folder",folderPath)
     if not os.path.exists(folderPath):
         os.mkdir(folderPath)
 
@@ -91,7 +92,7 @@ def getAllFilesFromDir(directory,extension):
             #Add to list
             wholeFile=os.path.join(root,file)
             if file.endswith(extension):
-                results.append(file)
+                results.append(wholeFile)
 
     return results
 
@@ -104,6 +105,12 @@ def addExtensionToFile(fileName,extension):
         return fileName
     else:
         return (fileName+extension)
+
+def getFileWithoutExtension(fileName):
+    return os.path.splitext(fileName)[0]
+
+def getBasename(filePath):
+    return os.path.basename(filePath)
 #--------------Classes-----------
 
 class smartDir:
@@ -172,28 +179,27 @@ class dataManager(smartDir):
     for data.
     """
     def __init__(self,projectManager):
-        smartDir.__init__(self,projectManager.rootDir,
+        smartDir.__init__(self,projectManager.projectRootDir,
             projectManager.dataFolderName)
-        self.name=projectManager.projectName
-        self.rootDir=projectManager.rootDir
+        self.name=projectManager.dataFolderName
+        self.rootDir=createFileFolderPath(projectManager.projectRootDir,self.name)
         self.projectManager=projectManager
         self.subFolderDict={}
 
         #Find current folders
         self.findSubFolders()
 
-    def findSubFolders():
+    def findSubFolders(self):
         """
         Will scan root directory
         for sub folers
         """
-        subFolders = [dI for dI in os.listdir('.') 
-        if os.path.isdir(os.path.join('.',dI))]
+        subFolders = next(os.walk(self.rootDir))[1]
         #Add each folder
         for folder in subFolders:
             self.addSubFolder(folder)
 
-    def addSubFolder(folderName):
+    def addSubFolder(self,folderName):
         """
         Will store a smart directory
         inside the data manager
@@ -235,7 +241,7 @@ class projectManager:
     """
     def __init__(self,rootDir,projectName):
         self.projectName=projectName
-        self.rootDir=rootDir
+        self.projectRootDir=rootDir
         self.dataFolderName=projectName+" data"
         self.dataManager=dataManager(self)
         #Store Template names
@@ -269,14 +275,14 @@ class projectManager:
         #Create Filename with extension
         fullFileName=addExtensionToFile(fileName,self.fileExtension)
         #Save to this file
-        self.dataManager.pickleData(self.userDataFolderName,content)
+        self.dataManager.pickleData(self.userDataFolderName,fullFileName,content)
 
     def findAllFiles(self,extension):
         """
         Will locate all files
         in directory with extension
         """
-        return getAllFilesFromDir(self.rootDir,extension)
+        return getAllFilesFromDir(self.projectRootDir,extension)
 
     def findAllUserFiles(self):
         """
@@ -285,6 +291,20 @@ class projectManager:
         """
         return self.findAllFiles(self.fileExtension)
 
+    def loadAllUserFiles(self):
+        """
+        Will unpickle all the userdata
+        and return it in a dictionary
+        key = filename in dir
+        value = object
+        """
+        allUserFiles=self.findAllUserFiles()
+        contentDict={}
+        for path in allUserFiles:
+            path=getBasename(path)
+            content=self.dataManager.openPickle(self.userDataFolderName,path)
+            contentDict[getFileWithoutExtension(path)]=content
+        return contentDict
 
 
         

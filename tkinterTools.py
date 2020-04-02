@@ -6,13 +6,76 @@ module containing functions and classes for UI
 
 #--------Imports----------
 from tkinter import *
-
+from tkinter import messagebox
+from shed.colourTools import getColourForBackground
 #--------Global Constants----------
 globalButtonWidth=15
 globalFont="system 13"
 globalFontBig="system 16"
 globalTitleFont="system 24"
+globalFontMega="syetem 22"
+globalFontTiny="system 9"
+globalColours={
+    "red":"#E58A8F",
+}
 
+#--------Functions----------
+
+def showMessage(pre,message):
+    """
+    Function to show a tkinter
+    message using messagebox
+    """
+    try:
+        messagebox.showinfo(pre,message)
+    except:
+        print(message)
+
+def getAllChildren(widget):
+    """
+    Will recursivley get all the children
+    of a widget
+    """
+    children=[]
+    if "winfo_children" in dir(widget):
+        for child in widget.winfo_children():
+            children.append(child)
+            results=getAllChildren(child)
+            if results:
+                children.extend(results)
+    return children
+
+def checkListInstanceOf(item,classList):
+    """
+    Will check if item belongs
+    to any of the classes given
+    in classlist
+    """
+    for i in classList:
+        if isinstance(item,i):
+            return True
+    return False
+
+def completeColour(widget,colour):
+    """
+    Will recursivley colour 
+    a widget
+    """
+    allChildren=getAllChildren(widget)
+    allChildren.append(widget)
+    for child in allChildren:
+        if "config" in dir(child):
+            if "highlightbackground" in child.config() and checkListInstanceOf(child,[Frame,Label]) is False:
+                print(type(child),"is background colour")
+                child.config(highlightbackground=colour)
+            else:
+                try:
+                    child.config(bg=colour)
+                except Exception as e:
+                    print("Error changing colour: ",e)
+        if type(child) in [advancedLabel,Label]:
+            newFg=getColourForBackground(colour)
+            child.config(fg=newFg)
 #--------Main Core Classes----------
 
 class mainFrame(Frame):
@@ -35,6 +98,13 @@ class mainFrame(Frame):
             self.grid_columnconfigure(x,weight=1)
             self.grid_rowconfigure(x,weight=1)
 
+    def colour(self,colour):
+        """
+        Will recursivley change the
+        colour of all the child
+        widgets
+        """
+        completeColour(self,colour)
 class screenController(mainFrame):
     """
     Screen Controller
@@ -90,14 +160,73 @@ class screen(mainFrame):
                
 class advancedListbox(Listbox):
     """
-    The advancedListbox is built on
-    the tkinter listbox but offers
-    built in methods to store objects
-    etc
+    An advanced listbox
+    can store objects
+    and has more functionality
+    compared to a standard listbox
     """
     def __init__(self,parent):
         Listbox.__init__(self,parent)
-        self.config(font="Avenir 15")
+        self.config(font=globalFontMega)
+        self.rowColour="#E1E0E2"
+        self.rowCount=0
+        self.objectDict={}
+    
+    def addObject(self,display,objectInstance):
+        """
+        Display data
+        and have it reference an object
+        """
+        #Display
+        paddedData=(" "*2)+str(display)
+        self.insert(END,paddedData)
+        self.rowCount+=1
+        if self.rowCount % 2 == 0:
+            self.itemconfig(END,bg=self.rowColour)
+        #Store
+        self.objectDict[display]=objectInstance
+
+    def getObject(self,name):
+        """
+        Will return the object
+        given the name
+        """
+        if name in self.objectDict:
+            return self.objectDict[name]
+
+    def getCurrentItem(self):
+        """
+        Get the name of the item
+        currently being selected
+        """
+        currentSelectionIndex=self.curselection()
+        if len(currentSelectionIndex) > 0:
+            return self.get(currentSelectionIndex[0]).lstrip()
+
+    def getCurrentObject(self):
+        """
+        Return the object currently in
+        selection
+        """
+        currentItem = self.getCurrentItem()
+        if currentItem in self.objectDict:
+            return self.objectDict[currentItem]
+
+    def clear(self,**kwargs):
+        """
+        Will delete everything from
+        the listbox and delete
+        all objects stored
+
+        retain = True: will keep objects
+        """
+        retain = kwargs.get("retain")
+        #Delete everything
+        self.delete(0,"end")
+        if not(retain):
+            #Clear all objects
+            self.objectDict.clear()
+
 
 class mainTopLevel(Toplevel):
     """
@@ -135,7 +264,6 @@ class mainTopLevel(Toplevel):
         """
         self.destroy()
         
-    
 #--------Secondary Core Classes----------
 
 class advancedLabel(Label):
@@ -167,7 +295,66 @@ class advancedNotebook(mainFrame):
     """
     def __init__(self,parent):
         mainFrame.__init__(self,parent)
+        #Store banned words
+        self.bannedWords=[]
+        self.blankAllowed=False
+        self.contentValid=True
+        self.reasonInvalid=""
+        self.defaultColour=self.cget("bg")
+        #Add the binding
+        self.bind("<KeyRelease>",lambda event: self.checkContent())
+        #Check content once to update
+        self.checkContent()
         
+    def checkContent(self):
+        """
+        Will check content of entry
+        and change colour depending
+        on if content is valid or not
+        """
+        entryContent=self.getContent().upper()
+        #Check that there is content
+        if len(entryContent.split()) < 1 and self.blankAllowed == False:
+            self.contentValid=False
+            self.reasonInvalid="Please enter something"
+            self.configure(bg=self.defaultColour)
+            return False
+        #Check
+        for item in self.bannedWords:
+            if item.upper() == entryContent:
+                self.contentValid=False
+                self.reasonInvalid="This word is banned"
+                self.configure(bg=globalColours["red"])
+                return False
+        self.resetSettings()
+
+    def resetSettings(self):
+        """
+        Used to reset colour
+        and variables, NOT content
+        """
+        self.configure(bg=self.defaultColour)
+        self.contentValid=True
+        self.reasonInvalid=""
+
+    def getContent(self):
+        """
+        Will return the contents
+        of the entry in plain 
+        text
+        """
+        return self.get()
+
+class advancedOptionMenu(OptionMenu):
+    """
+    Option Menu which allows
+    the variable to accessed at any time
+    """
+    def __init__(self,parent,variable,*values,**kwargs):
+        OptionMenu.__init__(self,parent,variable,*values,**kwargs)
+        self.var=variable
+
+>>>>>>> origin/master
 #--------Child Classes----------
 
 class dataSection(mainFrame):
@@ -178,14 +365,17 @@ class dataSection(mainFrame):
     """
     def __init__(self,parent,labelData):
         mainFrame.__init__(self,parent)
+        #Config
         self.labelText=StringVar()
         self.labelText.set(labelData)
+
         #Add Entry
         self.entry=advancedEntry(self)
         self.entry.grid(row=0,column=1,padx=5)
         #Add Label
         self.label=advancedLabel(self,textvariable=self.labelText)
         self.label.grid(row=0,column=0)
+
 
 class titleLabel(advancedLabel):
     """
@@ -196,3 +386,59 @@ class titleLabel(advancedLabel):
     def __init__(self,parent):
         advancedLabel.__init__(self,parent)
         self.configure(font=globalTitleFont)
+class buttonSection(mainFrame):
+    """
+    The ButtonSection is a frame
+    that contains a row of buttons
+    """
+    def __init__(self,parent):
+        mainFrame.__init__(self,parent)
+        #Config
+        self.gridConfig(0)
+        #Store data
+        self.buttonOrder=[]
+        self.buttonDict={}
+        #Add Center
+        self.centerFrame=mainFrame(self)
+        self.centerFrame.grid(row=0,column=0,pady=20)
+
+    def addButton(self,name):
+        """
+        Add a button 
+        to the frame
+        """
+        #Create the button
+        newButton=Button(self.centerFrame,text=name,width=globalButtonWidth)
+        #Display it
+        newButton.grid(row=0,column=len(self.buttonOrder),padx=10)
+        #Store it
+        self.buttonOrder.append(name)
+        self.buttonDict[name]=newButton
+
+    def getButton(self,name):
+        """
+        Will return the button
+        object given the name
+        """
+        if name in self.buttonDict:
+            return self.buttonDict[name]
+        
+class optionMenuSection(mainFrame):
+    """
+    Similar to dataSection but
+    optionMenu instead of entry
+    """
+    def __init__(self,parent,labelData):
+        mainFrame.__init__(self,parent)
+        #Config
+        self.labelText=StringVar()
+        self.labelText.set(labelData)
+        #Add Label
+        self.label=advancedLabel(self,textvariable=self.labelText)
+        self.label.grid(row=0,column=0)
+        #Add OptionMenu
+        self.optionVar=StringVar()
+        self.optionVar.set("None")
+        self.optionMenu=advancedOptionMenu(self,self.optionVar,["None"])
+        self.optionMenu.config(width=12)
+        self.optionMenu.grid(row=0,column=1,padx=5)
