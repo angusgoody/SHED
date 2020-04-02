@@ -479,3 +479,13 @@ class titleLabel(advancedLabel):
         advancedLabel.__init__(self,parent,**kwargs)
         self.configure(font=gobalFontTitle)
         
+
+class hiddenDataSection(dataSection):
+    """
+    Inherits from datasection but will
+    have the ability to show and hide contents
+    """
+    def __init__(self,parent,labelData):
+        dataSection.__init__(self,parent,labelData)
+        #Conigure
+        self.entry.conig(show="•")
