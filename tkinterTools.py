@@ -488,4 +488,4 @@ class hiddenDataSection(dataSection):
     def __init__(self,parent,labelData):
         dataSection.__init__(self,parent,labelData)
         #Conigure
-        self.entry.conig(show="•")
+        self.entry.config(show="•")
