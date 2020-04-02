@@ -475,7 +475,7 @@ class titleLabel(advancedLabel):
     """
     Label for displaying title sections
     """
-    def __init__(self,parent):
-        advancedLabel.__init__(self,parent)
+    def __init__(self,parent,**kwargs):
+        advancedLabel.__init__(self,parent,**kwargs)
         self.configure(font=gobalFontTitle)
         
