@@ -7,6 +7,7 @@ module containing functions and classes for UI
 #--------Imports----------
 from tkinter import *
 from tkinter import messagebox
+from tkinter import ttk
 from shed.colourTools import getColourForBackground
 #--------Global Constants----------
 globalButtonWidth=15
@@ -107,6 +108,7 @@ class mainFrame(Frame):
         widgets
         """
         completeColour(self,colour)
+
 class screenController(mainFrame):
     """
     Screen Controller
@@ -173,6 +175,11 @@ class advancedListbox(Listbox):
         self.rowColour="#E1E0E2"
         self.rowCount=0
         self.objectDict={}
+        #Add a scrollbar
+        self.scrollBar=Scrollbar(self)
+        self.scrollBar.pack(side=RIGHT,fill=Y)
+        self.scrollBar.config(command=self.yview)
+        self.config(yscrollcommand=self.scrollBar.set)
     
     def addObject(self,display,objectInstance):
         """
@@ -228,7 +235,6 @@ class advancedListbox(Listbox):
         if not(retain):
             #Clear all objects
             self.objectDict.clear()
-
 
 class mainTopLevel(Toplevel):
     """
@@ -349,6 +355,42 @@ class advancedOptionMenu(OptionMenu):
     def __init__(self,parent,variable,*values,**kwargs):
         OptionMenu.__init__(self,parent,variable,*values,**kwargs)
         self.var=variable
+
+class advancedTree(ttk.Treeview):
+    """
+    The advanced Tree class
+    is a modified tree class
+    which allows better control
+    over colours and storing data
+    etc
+    """
+    def __init__(self,parent,columns,**kwargs):
+        ttk.Treeview.__init__(self,parent,show="headings",columns=columns)
+        self.columns=columns
+        for item in self.columns:
+            self.addSection(item)
+        #Add the scrollbar
+        self.scroll=Scrollbar(self)
+        self.scroll.pack(side=RIGHT,fill=Y)
+        self.scroll.config(command=self.yview)
+        self.config(yscrollcommand=self.scroll.set)
+
+    def addSection(self,sectionName):
+        """
+        Add a section to the tree
+        """
+        self.column(sectionName,width=10,minwidth=45)
+        self.heading(sectionName,text=sectionName)
+
+    def insertData(self,values,tags):
+        """
+        Method to insert data into the treeview
+        """
+        #print("Inserting values",values)
+        self.insert("" , 0,values=values,tags=tags)
+
+    def addTag(self,tag,colour):
+        self.tag_configure(tag,background=colour)
 
 #--------Child Classes----------
 
