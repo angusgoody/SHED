@@ -297,7 +297,6 @@ class advancedEntry(Entry):
     def __init__(self,parent):
         Entry.__init__(self,parent)
         self.config(font=globalFont,width=15)
-
         #Store banned words
         self.bannedWords=[]
         self.blankAllowed=False
@@ -406,12 +405,11 @@ class dataSection(mainFrame):
         #Config
         self.labelText=StringVar()
         self.labelText.set(labelData)
-
         #Add Entry
         self.entry=advancedEntry(self)
         self.entry.grid(row=0,column=1,padx=5)
         #Add Label
-        self.label=advancedLabel(self,textvariable=self.labelText)
+        self.label=advancedLabel(self,textvariable=self.labelText,width=14,anchor="w")
         self.label.grid(row=0,column=0)
 
 class buttonSection(mainFrame):
