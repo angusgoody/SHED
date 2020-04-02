@@ -13,11 +13,12 @@ from shed.colourTools import getColourForBackground
 globalButtonWidth=15
 globalFont="system 13"
 globalFontBig="system 16"
-globalTitleFont="system 24"
-globalFontMega="syetem 22"
+globalFontMega="syetem 24"
 globalFontTiny="system 9"
 globalColours={
     "red":"#E58A8F",
+
+
 }
 
 #--------Functions----------
@@ -77,6 +78,7 @@ def completeColour(widget,colour):
         if type(child) in [advancedLabel,Label]:
             newFg=getColourForBackground(colour)
             child.config(fg=newFg)
+
 #--------Main Core Classes----------
 
 class mainFrame(Frame):
@@ -270,6 +272,8 @@ class mainTopLevel(Toplevel):
         """
         self.destroy()
         
+
+
 #--------Secondary Core Classes----------
 
 class advancedLabel(Label):
@@ -293,14 +297,6 @@ class advancedEntry(Entry):
         Entry.__init__(self,parent)
         self.config(font=globalFont,width=15)
 
-class advancedNotebook(mainFrame):
-    """
-    Advanced Notebook is a custom
-    notebook widget that allows
-    the user to switch tabs
-    """
-    def __init__(self,parent):
-        mainFrame.__init__(self,parent)
         #Store banned words
         self.bannedWords=[]
         self.blankAllowed=False
@@ -417,16 +413,6 @@ class dataSection(mainFrame):
         self.label=advancedLabel(self,textvariable=self.labelText)
         self.label.grid(row=0,column=0)
 
-
-class titleLabel(advancedLabel):
-    """
-    The title label will
-    be a modified label with
-    larger font
-    """
-    def __init__(self,parent):
-        advancedLabel.__init__(self,parent)
-        self.configure(font=globalTitleFont)
 class buttonSection(mainFrame):
     """
     The ButtonSection is a frame
