@@ -11,6 +11,7 @@ from tkinter import *
 globalButtonWidth=15
 globalFont="system 13"
 globalFontBig="system 16"
+globalTitleFont="system 24"
 
 #--------Main Core Classes----------
 
@@ -135,11 +136,6 @@ class mainTopLevel(Toplevel):
         self.destroy()
         
     
-        
-        
-        
-
-
 #--------Secondary Core Classes----------
 
 class advancedLabel(Label):
@@ -163,6 +159,15 @@ class advancedEntry(Entry):
         Entry.__init__(self,parent)
         self.config(font=globalFont,width=15)
 
+class advancedNotebook(mainFrame):
+    """
+    Advanced Notebook is a custom
+    notebook widget that allows
+    the user to switch tabs
+    """
+    def __init__(self,parent):
+        mainFrame.__init__(self,parent)
+        
 #--------Child Classes----------
 
 class dataSection(mainFrame):
@@ -181,3 +186,13 @@ class dataSection(mainFrame):
         #Add Label
         self.label=advancedLabel(self,textvariable=self.labelText)
         self.label.grid(row=0,column=0)
+
+class titleLabel(advancedLabel):
+    """
+    The title label will
+    be a modified label with
+    larger font
+    """
+    def __init__(self,parent):
+        advancedLabel.__init__(self,parent)
+        self.configure(font=globalTitleFont)
