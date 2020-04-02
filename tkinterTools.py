@@ -13,7 +13,8 @@ from shed.colourTools import getColourForBackground
 globalButtonWidth=15
 globalFont="system 13"
 globalFontBig="system 16"
-globalFontMega="syetem 24"
+gobalFontTitle="system 24"
+globalFontMega="syetem 22"
 globalFontTiny="system 9"
 globalColours={
     "red":"#E58A8F",
@@ -469,3 +470,12 @@ class optionMenuSection(mainFrame):
         self.optionMenu=advancedOptionMenu(self,self.optionVar,["None"])
         self.optionMenu.config(width=12)
         self.optionMenu.grid(row=0,column=1,padx=5)
+
+class titleLabel(advancedLabel):
+    """
+    Label for displaying title sections
+    """
+    def __init__(self,parent):
+        advancedLabel.__init__(self,parent)
+        self.configure(font=gobalFontTitle)
+        
