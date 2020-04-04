@@ -168,7 +168,8 @@ class smartDir:
         Will open a plain txt file and
         return the contents
         """
-        return openFile(createFileFolderPath(self.fullPath,fileName))
+        pass
+        #return openFile(createFileFolderPath(self.fullPath,fileName))
 
 class dataManager(smartDir):
     """

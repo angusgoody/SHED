@@ -34,6 +34,14 @@ def showMessage(pre,message):
     except:
         print(message)
 
+def askYesNoCancel(pre,message):
+    try:
+        response=messagebox.askyesnocancel(pre,message)
+    except:
+        print("Error asking yesnocancel")
+    else:
+        return response
+
 def getAllChildren(widget):
     """
     Will recursivley get all the children
