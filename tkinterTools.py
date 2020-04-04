@@ -244,6 +244,8 @@ class advancedListbox(Listbox):
         if not(retain):
             #Clear all objects
             self.objectDict.clear()
+        #Reset counter for colour
+        self.rowCount=0
 
 class mainTopLevel(Toplevel):
     """
@@ -361,6 +363,15 @@ class advancedEntry(Entry):
         text
         """
         return self.get()
+
+    def clear(self):
+        self.delete(0, END)
+    def addData(self,contents):
+        """
+        Will clear and add new data
+        """
+        self.clear()
+        self.insert(0, contents)
 
 class advancedOptionMenu(OptionMenu):
     """
